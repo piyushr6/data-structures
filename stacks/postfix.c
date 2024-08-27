@@ -26,20 +26,17 @@ int precedence(char operator)
    }
 }
 
-// void push(struct stack *st, char data)
-// {
-//    st->arr[++(st->top)] = data;
-// }
-
-// char pop(struct stack *st)
-// {
-//    st->top--;
-//    return st->arr[st->top];
-// }
+int stackIsFull(struct stack *st)
+{
+   if (st->top == st->size - 1)
+      return 1;
+   else
+      return 0;
+}
 
 void push(struct stack *st, char data)
 {
-   if (st->top == st->size - 1)
+   if (stackIsFull(st))
    {
       printf("Stack overflow\n");
       return;
@@ -49,7 +46,7 @@ void push(struct stack *st, char data)
 
 char pop(struct stack *st)
 {
-   if (st->top == -1)
+   if (!stackIsFull(st))
    {
       printf("Stack underflow\n");
       return '\0';
@@ -57,20 +54,12 @@ char pop(struct stack *st)
    return st->arr[(st->top)--];
 }
 
-int stackIsFull(struct stack *st)
-{
-   if (st->top == st->size - 1)
-      return 1;
-   else
-      return 0;
-}
-
 int main()
 {
    // st is stack variable
    struct stack *st = (struct stack *)malloc(sizeof(struct stack));
 
-   char infix[] = "a/b*(c+(d–e))";
+   char infix[] = "a/b*(c+(d-e))";
 
    st->size = strlen(infix);
    st->top = -1;
@@ -80,7 +69,7 @@ int main()
 
    while (infix[i] != '\0')
    {
-      if (infix[i] >= 97 && infix[st->top] <= 122)
+      if (infix[i] >= 97 && infix[i] <= 122)
       {
          printf("%c", infix[i]);
       }
