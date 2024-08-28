@@ -19,6 +19,8 @@ int precedence(char operator)
    case '*':
    case '/':
       return 2;
+   case '^':
+      return 3;
    default:
       return -1; // Invalid operator
    }
@@ -70,9 +72,9 @@ int main()
 {
    struct stack *st = (struct stack *)malloc(sizeof(struct stack));
 
-   char infix[] = "a/b*(c+(d-e))";
-   printf("Given infix :  a/b*(c+(d-e)) \n");
-   printf("Corresponding postfix : ");
+   char infix[] = "a+b-c+d-e-f+g*i";
+   printf("Given infix :  a+b-c+d-e-f+g*i \n");
+   printf("Corresponding postfix : \n");
 
    st->size = strlen(infix);
    st->top = -1;
