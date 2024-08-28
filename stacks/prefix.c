@@ -99,7 +99,7 @@ void printStack(struct stack *st)
 
 int main()
 {
-   char infix[] = "a+b-c-e-e+f+f-h+i";
+   char infix[] = "a+(b-c)*d+e-(f*(g/h))";
    printf("Infix expression: %s\n", infix);
 
    struct stack *st = (struct stack *)malloc(sizeof(struct stack));
@@ -147,6 +147,7 @@ int main()
    while (!stackIsEmpty(st))
    {
       prefix[k++] = pop(st);
+      printStack(st);
    } // popping all remaining operators.
 
    prefix[k] = '\0';
