@@ -4,9 +4,9 @@
 
 struct stack
 {
-   char *arr;
-   int size;
-   int top;
+   char *arr; // The string of operators and operands
+   int size;  // size of the stack
+   int top;   // index of the top element
 };
 
 int precedence(char operator)
@@ -14,11 +14,9 @@ int precedence(char operator)
    switch (operator)
    {
    case '+':
-      return 1;
    case '-':
       return 1;
    case '*':
-      return 2;
    case '/':
       return 2;
    default:
@@ -26,12 +24,16 @@ int precedence(char operator)
    }
 }
 
+// Function to check whether stack is empty
+int stackIsEmpty(struct stack *st)
+{
+   return st->top == -1;
+}
+
+// Function to check whether stack is full
 int stackIsFull(struct stack *st)
 {
-   if (st->top == st->size - 1)
-      return 1;
-   else
-      return 0;
+   return st->top == st->size - 1;
 }
 
 void push(struct stack *st, char data)
@@ -46,7 +48,7 @@ void push(struct stack *st, char data)
 
 char pop(struct stack *st)
 {
-   if (!stackIsFull(st))
+   if (stackIsEmpty(st))
    {
       printf("Stack underflow\n");
       return '\0';
@@ -54,51 +56,61 @@ char pop(struct stack *st)
    return st->arr[(st->top)--];
 }
 
+void printStack(struct stack *st)
+{
+   int temp = st->top;
+   while (temp != -1)
+   {
+      printf("%c ", st->arr[temp--]);
+   }
+   printf("\n");
+}
+
 int main()
 {
-   // st is stack variable
    struct stack *st = (struct stack *)malloc(sizeof(struct stack));
 
    char infix[] = "a/b*(c+(d-e))";
+   printf("Given infix :  a/b*(c+(d-e)) \n");
+   printf("Corresponding postfix : ");
 
    st->size = strlen(infix);
    st->top = -1;
-   st->arr = (char *)malloc(st->size * sizeof(char)); // malloc default is void so typecasted to char
+   st->arr = (char *)malloc(st->size * sizeof(char));
 
    int i = 0;
 
    while (infix[i] != '\0')
    {
-      if (infix[i] >= 97 && infix[i] <= 122)
+      if (infix[i] >= 'a' && infix[i] <= 'z') // if it is an operand
       {
          printf("%c", infix[i]);
       }
-      else
+      else if (infix[i] == '(') // case of '('
       {
-         if (infix[i] == '(')
-            push(st, '(');
-
-         else if (infix[i] == ')')
-         {
-            while (st->arr[st->top] != '(')
-            {
-               printf("%c", pop(st));
-            }
-            pop(st); // pop the '('
-         }
-         else
-         {
-            while (st->top != -1 && precedence(st->arr[st->top]) >= precedence(infix[i]))
-            {
-               printf("%c", pop(st));
-            }
-            push(st, infix[i]);
-         }
+         push(st, '(');
       }
+      else if (infix[i] == ')') // case of ')'
+      {
+         while (!stackIsEmpty(st) && st->arr[st->top] != '(')
+         {
+            printf("%c", pop(st));
+         }
+         pop(st); // pop the '('
+      }
+      else // case of an operator
+      {
+         while (!stackIsEmpty(st) && precedence(st->arr[st->top]) >= precedence(infix[i]))
+         {
+            printf("%c", pop(st));
+         }
+         push(st, infix[i]);
+      }
+      printStack(st);
       i++;
    }
 
-   while (st->top != -1)
+   while (!stackIsEmpty(st)) // pop all remaining operators
    {
       printf("%c", pop(st));
    }
