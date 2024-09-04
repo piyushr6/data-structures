@@ -1,138 +1,157 @@
 #include <stdio.h>
-#include <string.h>
 #include <stdlib.h>
 
-struct queue
+struct Queue
 {
-   int arr[9]; // Array to hold queue elements
-   int front;  // Index of the front element
-   int rear;   // Index of the rear element
-   int size;   // Maximum size of the queue
+   int size;
+   int front; // front pointer
+   int rear;  // rear pointer
+   int *arr;  // array to store elements of queue
 };
 
-// Function to check if the queue is full
-int isQueueFull(struct queue *q)
+// Function to initialize the queue with a given size
+void initialize(struct Queue *q, int s)
 {
-   if (q->rear == q->size - 1)
-      return 1;
-   else
-      return 0;
+   q->size = s;
+   q->front = -1;                                 // initialize front to -1
+   q->rear = 0;                                   // initialize rear to 0
+   q->arr = (int *)malloc(q->size * sizeof(int)); // allocate memory for the queue array
 }
 
-// Function to check if the queue is empty
-int isQueueEmpty(struct queue *q)
+// Function to add an element to the queue
+void enqueue(struct Queue *q, int x)
 {
-   if (q->front == -1 || q->front > q->rear)
-      return 1;
-   else
-      return 0;
-}
-
-// ENQUEUE
-void enqueue(struct queue *q, int n)
-{
-   if (isQueueFull(q))
+   if (q->rear == q->size)
    {
-      printf("Queue is full \n");
-      return;
+      printf("The queue is full\n");
    }
-
-   if (q->front == -1)
-      q->front++;
-
-   q->rear++;
-   q->arr[q->rear] = n;
+   else
+   {
+      q->arr[q->rear] = x; // Add element to the rear of the queue
+      q->rear++;           // Increment the rear index
+   }
 }
 
-// DEQUEUE
-int dequeue(struct queue *q)
+// Function to remove an element from the queue
+void dequeue(struct Queue *q)
 {
-   if (isQueueEmpty(q))
+   if (q->rear - 1 == q->front)
    {
-      printf("Queue is empty \n");
+      printf("The queue is empty\n");
+   }
+   else
+   {
+      q->front++;
+   }
+}
+
+// Function to get the front element of the queue
+int peek(struct Queue *q)
+{
+   if (q->front == q->rear - 1)
+   {
       return -1;
    }
-   if (q->front == q->rear)
+   else
    {
-      q->front = -1;
-      q->rear = -1;
+      return q->arr[q->front + 1];
    }
-
-   printf("Queue is empty \n");
-   return -1;
-
-   int item = q->arr[q->front];
-   q->front++;
-   return item;
 }
 
-// Function to display the elements in the queue
-void displayQueue(struct queue *q)
+// Function to display the elements of the queue
+void display(struct Queue *q)
 {
-   if (isQueueEmpty(q))
+   if (q->front == q->rear - 1)
    {
-      printf("Queue is empty!\n");
+      printf("Queue is empty\n");
       return;
    }
 
-   printf("Queue: ");
-   for (int i = q->front; i <= q->rear; i++)
+   // Print elements from rear to front
+   for (int i = q->rear - 1; i >= q->front + 1; i--)
    {
-      printf("\nelement=%d front=%d back = %d", q->arr[i], q->front, q->rear);
-      // printf("\n");
+      printf("%d ", q->arr[i]);
    }
 
    printf("\n");
 }
 
-// 5, 8, 1, 7, 4, 2, 9, 6, 3
-
 int main()
 {
-   struct queue *h1 = (struct queue *)malloc(sizeof(struct queue));
-   struct queue *h2 = (struct queue *)malloc(sizeof(struct queue));
-   struct queue *input_track = (struct queue *)malloc(sizeof(struct queue));
-   struct queue *output_track = (struct queue *)malloc(sizeof(struct queue));
+   int input[] = {5, 8, 1, 7, 4, 2, 9, 6, 3}; // Input array
 
-   int inp[9] = {5, 8, 1, 7, 4, 2, 9, 6, 3};
+   // Initialize the first queue (q1) with the size of the input array
+   struct Queue *q1 = (struct Queue *)malloc(sizeof(struct Queue));
+   int s = 9;
+   initialize(q1, s);
 
-   input_track->front = -1;
-   input_track->rear = -1;
-   input_track->size = 9;
-
-   for (int i = 0; i < 9; i++)
+   // Enqueue elements into q1 in reverse order of the input array
+   for (int i = s - 1; i >= 0; i--)
    {
-      enqueue(input_track, inp[i]);
-      displayQueue(input_track);
-   } // now rear and front both point to 0
-
-   for (int i = 0; i < 9; i++)
-   {
-      // enqueue(input_track, inp[i]);
-      dequeue(input_track);
-      displayQueue(input_track);
-   } // now rear and front both point to 0
-
-   // displayQueue(input_track);
-
-   for (int i = 0; i < 9; i++)
-   {
-      // if (input_track->arr[i] == 1)
-      // {
-      //    enqueue(output_track, input_track->arr[i]);
-      // }
-      if (input_track->arr[i] < input_track->arr[i + 1])
-      {
-         enqueue(h1, dequeue(input_track));
-         displayQueue(h1);
-      }
-      else
-      {
-         enqueue(h2, dequeue(input_track));
-         displayQueue(h2);
-      }
+      enqueue(q1, input[i]);
    }
 
-   displayQueue(h1);
-   displayQueue(h2);
+   printf("Input track is:\n");
+   display(q1); // Display the contents of q1
+
+   struct Queue *h1 = (struct Queue *)malloc(sizeof(struct Queue));
+   initialize(h1, s);
+   struct Queue *h2 = (struct Queue *)malloc(sizeof(struct Queue));
+   initialize(h2, s);
+   struct Queue *q2 = (struct Queue *)malloc(sizeof(struct Queue));
+   initialize(q2, s);
+
+   int req = 1;
+
+   while (req <= s)
+   {
+      int x = peek(q1);
+      int y = peek(h1);
+      int z = peek(h2);
+
+      if (x == req) // If the front of q1 is the required element
+      {
+         dequeue(q1);
+         enqueue(q2, x);
+         req++;
+      }
+      else if (y == req)
+      {
+         dequeue(h1);
+         enqueue(q2, y);
+         req++;
+      }
+      else if (z == req)
+      {
+         dequeue(h2);
+         enqueue(q2, z);
+         req++;
+      }
+      else // If none of the queues have the required element at the front
+      {
+
+         if (h1->rear == h1->front + 1 || (h1->rear != h1->front + 1 && x > h1->arr[h1->rear - 1]))
+         {
+            enqueue(h1, x);
+            dequeue(q1);
+         }
+         else
+         {
+            enqueue(h2, x);
+            dequeue(q1);
+         }
+      }
+
+      printf("h1 : ");
+      display(h1);
+      printf("h2 : ");
+      display(h2);
+      printf("output queue : ");
+      display(q2);
+   }
+
+   printf("\n");
+   printf("Final output track:\n");
+   display(q2);
+   return 0;
 }
