@@ -41,7 +41,7 @@ struct node *insert(struct node *root, int data)
    return root; // Return the unchanged node pointer
 }
 
-// In-order traversal (Left, Root, Right)
+// function for inorder traversal
 void inOrder(struct node *root)
 {
    if (root == NULL)
@@ -52,7 +52,7 @@ void inOrder(struct node *root)
    inOrder(root->right);
 }
 
-// Pre-order traversal (Root, Left, Right)
+// function for preorder traversal
 void preOrder(struct node *root)
 {
    if (root == NULL)
@@ -61,7 +61,9 @@ void preOrder(struct node *root)
    printf("%d ", root->data);
    preOrder(root->left);
    preOrder(root->right);
-} // Function to find the minimum value in the binary tree
+}
+
+// Function to find the minimum value in the binary tree
 int min(struct node *root)
 {
    if (root == NULL)
@@ -70,12 +72,11 @@ int min(struct node *root)
       return -1; // Indicating an empty tree
    }
 
-   // Keep going left until we find the leftmost leaf
    while (root->left != NULL)
    {
       root = root->left;
    }
-   return root->data; // Return the minimum value
+   return root->data;
 }
 
 // Function to find the maximum value in the binary tree
@@ -84,29 +85,122 @@ int max(struct node *root)
    if (root == NULL)
    {
       printf("Tree is empty.\n");
-      return -1; // Indicating an empty tree
+      return -1;
    }
 
-   // Keep going right until we find the rightmost leaf
    while (root->right != NULL)
    {
       root = root->right;
    }
-   return root->data; // Return the maximum value
+   return root->data;
 }
 
-int search(struct node *root, int data)
+// Function to search for a node in the BST
+struct node *search(struct node *root, int data)
 {
-   if (root->data == data)
-      return 1;
+   if (root == NULL || root->data == data)
+      return root; // Return the node if found
+
+   if (data < root->data)
+      return search(root->left, data);
+   else
+      return search(root->right, data);
+}
+
+// Function to find the predecessor of a given node
+int getPredecessor(struct node *root, int key)
+{
+   struct node *current = search(root, key);
+   if (current == NULL)
+      return -1; // Key not found
+
+   if (current->left != NULL)
+   {
+      return max(current->left);
+   }
+
+   struct node *predecessor = NULL;
+   struct node *ancestor = root;
+   while (ancestor != current)
+   {
+      if (key > ancestor->data)
+      {
+         predecessor = ancestor;
+         ancestor = ancestor->right;
+      }
+      else
+      {
+         ancestor = ancestor->left;
+      }
+   }
+   return (predecessor != NULL) ? predecessor->data : -1;
+}
+
+// Function to find the successor of a given node
+int getSuccessor(struct node *root, int key)
+{
+   struct node *current = search(root, key);
+   if (current == NULL)
+      return -1; // Key not found
+
+   if (current->right != NULL)
+   {
+      return min(current->right);
+   }
+
+   struct node *successor = NULL;
+   struct node *ancestor = root;
+   while (ancestor != current)
+   {
+      if (key < ancestor->data)
+      {
+         successor = ancestor;
+         ancestor = ancestor->left;
+      }
+      else
+      {
+         ancestor = ancestor->right;
+      }
+   }
+   return (successor != NULL) ? successor->data : -1;
+}
+
+// Function to delete a node from the BST
+struct node *deleteNode(struct node *root, int key)
+{
+   if (root == NULL)
+   {
+      return root;
+   }
+
+   if (key < root->data)
+   {
+      root->left = deleteNode(root->left, key);
+   }
+   else if (key > root->data)
+   {
+      root->right = deleteNode(root->right, key);
+   }
    else
    {
-      if (data < root->data)
-         root = root->left;
-      else
-         root = root->right;
+      if (root->left == NULL)
+      {
+         struct node *temp = root->right;
+         free(root);
+         return temp;
+      }
+      else if (root->right == NULL)
+      {
+         struct node *temp = root->left;
+         free(root);
+         return temp;
+      }
+
+      int successorValue = min(root->right);
+      root->data = successorValue;
+      root->right = deleteNode(root->right, successorValue);
    }
-   return 0;
+   return root;
 }
 
 int main()
@@ -125,7 +219,7 @@ int main()
       if (data == -1)
          break;
 
-      root = insert(root, data); // Insert the data into the BST
+      root = insert(root, data);
    }
 
    printf("\nThe preOrder traversal of the tree is: ");
@@ -134,17 +228,34 @@ int main()
    printf("\nThe inOrder traversal of the tree is: ");
    inOrder(root);
 
-   printf("\nEnter data to be searched:");
+   printf("\nEnter data to be searched: ");
    int d;
    scanf("%d", &d);
 
-   if (search(root, d) == 1)
-      printf("\nElement found!");
+   if (search(root, d) != NULL)
+      printf("Element found!");
    else
-      printf("\nElement not found");
+      printf("Element not found");
 
-   printf("\n The minimum value in this tree is %d", min(root));
-   printf("\n The maximum value in this tree is %d", max(root));
+   printf("\nThe minimum value in this tree is %d", min(root));
+   printf("\nThe maximum value in this tree is %d", max(root));
+
+   printf("\nEnter node for which you want predecessor: ");
+   int np;
+   scanf("%d", &np);
+   getPredecessor(root, np);
+   printf("\nThe predecessor of the element is : %d", getPredecessor(root, np));
+
+   printf("\nEnter node for which you want successor: ");
+   int sp;
+   scanf("%d", &sp);
+   printf("\nThe successor of the element is : %d", getSuccessor(root, sp));
+
+   printf("\nEnter the node which you want to delete from the tree:");
+   int delnode;
+   scanf("%d", &sp);
+   deleteNode(root, sp);
+   printf("\nNode deleted!!");
 
    return 0;
 }
