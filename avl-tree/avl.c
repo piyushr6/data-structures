@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+// Defining structure for the AVL Tree node
 struct TreeNode
 {
    int value;
@@ -25,17 +26,21 @@ int getNodeHeight(struct TreeNode *node)
 {
    if (node == NULL)
       return 0;
+
    return node->nodeHeight;
 }
 
 // Function to get the maximum of two integers
 int getMax(int a, int b)
 {
-   return (a > b) ? a : b;
+   if (a > b)
+      return a;
+   else
+      return b;
 }
 
 // Allocating memory to tree node
-struct TreeNode *initializeNode(int value)
+struct TreeNode *createNode(int value)
 {
    struct TreeNode *newNode = (struct TreeNode *)malloc(sizeof(struct TreeNode));
 
@@ -48,7 +53,7 @@ struct TreeNode *initializeNode(int value)
 }
 
 // Function to perform right rotation on the tree node
-struct TreeNode *performRightRotation(struct TreeNode *y)
+struct TreeNode *rightRotate(struct TreeNode *y)
 {
    struct TreeNode *x = y->leftChild;
    struct TreeNode *temp = x->rightChild;
@@ -65,7 +70,7 @@ struct TreeNode *performRightRotation(struct TreeNode *y)
 }
 
 // Function to perform left rotation on the tree node
-struct TreeNode *performLeftRotation(struct TreeNode *x)
+struct TreeNode *leftRotate(struct TreeNode *x)
 {
    struct TreeNode *y = x->rightChild;
    struct TreeNode *temp = y->leftChild;
@@ -86,6 +91,7 @@ int calculateBalanceFactor(struct TreeNode *node)
 {
    if (node == NULL)
       return 0;
+
    return getNodeHeight(node->leftChild) - getNodeHeight(node->rightChild);
 }
 
@@ -93,7 +99,7 @@ int calculateBalanceFactor(struct TreeNode *node)
 struct TreeNode *addNode(struct TreeNode *node, int value)
 {
    if (node == NULL)
-      return initializeNode(value);
+      return createNode(value);
 
    if (value < node->value)
       node->leftChild = addNode(node->leftChild, value);
@@ -105,29 +111,29 @@ struct TreeNode *addNode(struct TreeNode *node, int value)
    node->nodeHeight = 1 + getMax(getNodeHeight(node->leftChild), getNodeHeight(node->rightChild));
    int balanceFactor = calculateBalanceFactor(node);
 
-   printf("\nPreorder Traversal before balancing: ");
+   printf("\nPreorder Traversal of the AVL Tree before balancing: ");
    printPreorder(node);
 
    // Left Left Case
-   if (balanceFactor > 1 & value < node->leftChild->value)
-      return performRightRotation(node);
+   if (balanceFactor > 1 && value < node->leftChild->value)
+      return rightRotate(node);
 
    // Right Right Case
-   if (balanceFactor<-1 & value> node->rightChild->value)
-      return performLeftRotation(node);
+   if (balanceFactor < -1 && value > node->rightChild->value)
+      return leftRotate(node);
 
    // Left Right Case
-   if (balanceFactor > 1 & value > node->leftChild->value)
+   if (balanceFactor > 1 && value > node->leftChild->value)
    {
-      node->leftChild = performLeftRotation(node->leftChild);
-      return performRightRotation(node);
+      node->leftChild = leftRotate(node->leftChild);
+      return rightRotate(node);
    }
 
    // Right Left Case
-   if (balanceFactor < -1 & value < node->rightChild->value)
+   if (balanceFactor < -1 && value < node->rightChild->value)
    {
-      node->rightChild = performRightRotation(node->rightChild);
-      return performLeftRotation(node);
+      node->rightChild = rightRotate(node->rightChild);
+      return leftRotate(node);
    }
 
    printf("\nPreorder Traversal after balancing: ");
@@ -136,7 +142,94 @@ struct TreeNode *addNode(struct TreeNode *node, int value)
    return node;
 }
 
-void main()
+// Function to find the node with the minimum value in a tree
+struct TreeNode *findMinNode(struct TreeNode *node)
+{
+   struct TreeNode *current = node;
+
+   while (current->leftChild != NULL)
+      current = current->leftChild;
+
+   return current;
+}
+
+// Function to delete a node from the AVL tree
+struct TreeNode *deleteNode(struct TreeNode *root, int value)
+{
+   if (root == NULL)
+      return root;
+
+   if (value < root->value)
+      root->leftChild = deleteNode(root->leftChild, value);
+   else if (value > root->value)
+      root->rightChild = deleteNode(root->rightChild, value);
+   else
+   {
+      // Node with only one child or no child
+      if ((root->leftChild == NULL) || (root->rightChild == NULL))
+      {
+         struct TreeNode *temp;
+         if (root->leftChild != NULL)
+            temp = root->leftChild;
+         else
+            temp = root->rightChild;
+
+         if (temp == NULL)
+         {
+            temp = root;
+            root = NULL;
+         }
+         else
+            *root = *temp;
+
+         free(temp);
+      }
+      else
+      {
+         struct TreeNode *temp = findMinNode(root->rightChild);
+         root->value = temp->value;
+         root->rightChild = deleteNode(root->rightChild, temp->value);
+      }
+   }
+
+   if (root == NULL)
+      return root;
+
+   root->nodeHeight = 1 + getMax(getNodeHeight(root->leftChild), getNodeHeight(root->rightChild));
+   int balanceFactor = calculateBalanceFactor(root);
+
+   printf("\nPreorder Traversal before balancing: ");
+   printPreorder(root);
+
+   // Left Left Case
+   if (balanceFactor > 1 && calculateBalanceFactor(root->leftChild) >= 0)
+      return rightRotate(root);
+
+   // Left Right Case
+   if (balanceFactor > 1 && calculateBalanceFactor(root->leftChild) < 0)
+   {
+      root->leftChild = leftRotate(root->leftChild);
+      return rightRotate(root);
+   }
+
+   // Right Right Case
+   if (balanceFactor < -1 && calculateBalanceFactor(root->rightChild) <= 0)
+      return leftRotate(root);
+
+   // Right Left Case
+   if (balanceFactor < -1 && calculateBalanceFactor(root->rightChild) > 0)
+   {
+      root->rightChild = rightRotate(root->rightChild);
+      return leftRotate(root);
+   }
+
+   printf("\nPreorder Traversal after balancing: ");
+   printPreorder(root);
+
+   return root;
+}
+
+int main()
 {
    struct TreeNode *root = NULL;
    int value;
@@ -150,4 +243,16 @@ void main()
       printf("\nEnter a number to insert into AVL tree (-1 to stop): ");
       scanf("%d", &value);
    }
+
+   // Deleting nodes from the AVL tree
+   printf("\nEnter a number to delete from AVL tree (-1 to stop): ");
+   scanf("%d", &value);
+   while (value >= 0)
+   {
+      root = deleteNode(root, value);
+      printf("\nEnter a number to delete from AVL tree (-1 to stop): ");
+      scanf("%d", &value);
+   }
+
+   return 0;
 }
