@@ -26,29 +26,23 @@ int getNodeHeight(struct TreeNode *node)
 {
    if (node == NULL)
       return 0;
-
    return node->nodeHeight;
 }
 
 // Function to get the maximum of two integers
 int getMax(int a, int b)
 {
-   if (a > b)
-      return a;
-   else
-      return b;
+   return (a > b) ? a : b;
 }
 
 // Allocating memory to tree node
 struct TreeNode *createNode(int value)
 {
    struct TreeNode *newNode = (struct TreeNode *)malloc(sizeof(struct TreeNode));
-
    newNode->value = value;
    newNode->leftChild = NULL;
    newNode->rightChild = NULL;
    newNode->nodeHeight = 1;
-
    return newNode;
 }
 
@@ -91,7 +85,6 @@ int calculateBalanceFactor(struct TreeNode *node)
 {
    if (node == NULL)
       return 0;
-
    return getNodeHeight(node->leftChild) - getNodeHeight(node->rightChild);
 }
 
@@ -116,24 +109,24 @@ struct TreeNode *addNode(struct TreeNode *node, int value)
 
    // Left Left Case
    if (balanceFactor > 1 && value < node->leftChild->value)
-      return rightRotate(node);
+      node = rightRotate(node);
 
    // Right Right Case
-   if (balanceFactor < -1 && value > node->rightChild->value)
-      return leftRotate(node);
+   else if (balanceFactor < -1 && value > node->rightChild->value)
+      node = leftRotate(node);
 
    // Left Right Case
-   if (balanceFactor > 1 && value > node->leftChild->value)
+   else if (balanceFactor > 1 && value > node->leftChild->value)
    {
       node->leftChild = leftRotate(node->leftChild);
-      return rightRotate(node);
+      node = rightRotate(node);
    }
 
    // Right Left Case
-   if (balanceFactor < -1 && value < node->rightChild->value)
+   else if (balanceFactor < -1 && value < node->rightChild->value)
    {
       node->rightChild = rightRotate(node->rightChild);
-      return leftRotate(node);
+      node = leftRotate(node);
    }
 
    printf("\nPreorder Traversal after balancing: ");
@@ -146,10 +139,8 @@ struct TreeNode *addNode(struct TreeNode *node, int value)
 struct TreeNode *findMinNode(struct TreeNode *node)
 {
    struct TreeNode *current = node;
-
    while (current->leftChild != NULL)
       current = current->leftChild;
-
    return current;
 }
 
@@ -165,15 +156,9 @@ struct TreeNode *deleteNode(struct TreeNode *root, int value)
       root->rightChild = deleteNode(root->rightChild, value);
    else
    {
-      // Node with only one child or no child
       if ((root->leftChild == NULL) || (root->rightChild == NULL))
       {
-         struct TreeNode *temp;
-         if (root->leftChild != NULL)
-            temp = root->leftChild;
-         else
-            temp = root->rightChild;
-
+         struct TreeNode *temp = root->leftChild ? root->leftChild : root->rightChild;
          if (temp == NULL)
          {
             temp = root;
@@ -181,7 +166,6 @@ struct TreeNode *deleteNode(struct TreeNode *root, int value)
          }
          else
             *root = *temp;
-
          free(temp);
       }
       else
@@ -203,24 +187,24 @@ struct TreeNode *deleteNode(struct TreeNode *root, int value)
 
    // Left Left Case
    if (balanceFactor > 1 && calculateBalanceFactor(root->leftChild) >= 0)
-      return rightRotate(root);
+      root = rightRotate(root);
 
    // Left Right Case
-   if (balanceFactor > 1 && calculateBalanceFactor(root->leftChild) < 0)
+   else if (balanceFactor > 1 && calculateBalanceFactor(root->leftChild) < 0)
    {
       root->leftChild = leftRotate(root->leftChild);
-      return rightRotate(root);
+      root = rightRotate(root);
    }
 
    // Right Right Case
-   if (balanceFactor < -1 && calculateBalanceFactor(root->rightChild) <= 0)
-      return leftRotate(root);
+   else if (balanceFactor < -1 && calculateBalanceFactor(root->rightChild) <= 0)
+      root = leftRotate(root);
 
    // Right Left Case
-   if (balanceFactor < -1 && calculateBalanceFactor(root->rightChild) > 0)
+   else if (balanceFactor < -1 && calculateBalanceFactor(root->rightChild) > 0)
    {
       root->rightChild = rightRotate(root->rightChild);
-      return leftRotate(root);
+      root = leftRotate(root);
    }
 
    printf("\nPreorder Traversal after balancing: ");
