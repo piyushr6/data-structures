@@ -1,2 +1,2 @@
 # data-structures
-All codes of DS course for sem 3
+DS Practicals - Sem 3
